@@ -4,7 +4,14 @@
 #!/usr/bin/python3
 
 # Load necessary modules 
-import os, subprocess 
+import os, subprocess, sys 
+
+	### Do you need to install esearch? ###
+
+	# Can you check if it installed first?
+	#sh -c "$(wget -q ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-edirect.sh -O -)"
+
+
 
 ### ASK USER FOR INFO ###
 
@@ -16,32 +23,67 @@ print(protein_family, "selected")
 taxonomic_group=input("Which taxonomic group are you analysing?\n\t> ")
 print(taxonomic_group, "selected")
 
-esearch_command="esearch -db protein_family -query taxonomic_group"
-
+esearch1="esearch -db protein -query protein_family AND taxonomic_group"
+esearch_command="esearch -db protein -query "protein_family AND taxonomic_group" | efetch -format uid > uid_output"
+# esearch_fasta="esearch -db protein -query protein_family AND taxonomic_group | efetch -format fasta > fasta_uid"
 
 	#esearch -db protein -query "taxonomic_group AND protein_family" | efetch -db protein -format uid > uid_output
 
 	#cat uid_output | wc -l > seq_number
-	
-	#if (seq_number > 1000):
-	#	answer=input("More than 1000 sequences, do you wish to continue (Yes or No)?\n\t> ")
-	#	if answer == "Yes":
-	#		print("Continuing to the next step")
-	#	else:
-	# 		 exit("Exiting script due to 1000+ sequences"
 
 # These will then be input to the command used to fetch the sequences,
 # before downloading check the number of sequeces and the composition
 
 
 # Perform command to fetch protein sequence data
-subprocess.call("esearch_command, shell=True")
+subprocess.call(esearch1, shell=True)
+subprocess.call(esearch_command, shell=True)
+
+
+
+with open(r"uid_output", 'r') as fp:
+     x = len(fp.readlines())
+     print('total lines:', x)
+
+
+
+### >1000 sequences ###
+
+# This block interacts with the user if there are more than 1000 sequences present
+#x=1800 # x is the number of sequences
+
+# Find out how user would like to proceed:
+if (x > 100):
+  while True:
+    try:
+      a=input("More than 1000 sequences, do you wish to continue? (Yes or No)\n\t> ")
+      if a == "Yes" or a == "No":
+        break;
+      else:
+        print("Please type Yes or No\n")
+    except:
+      continue
+
+# If user wishes to continue despite large size:
+if (a == "Yes"):
+  print("Continuing...")
+
+# If user wishes to exit due to large size:
+if (a == "No"):
+  sys.exit("Exiting...")
+
+#print to check you made it to the bottom
+print("you made it")
+
+
+
+# Fetch the sequences in fasta format 
+# subprocess.call(esearch_fasta, shell=True)
+
+
 
 ### CHECK IN WITH USER ###
 
-# More than 1000 sequences - do you wish to continue?
-
 # The sequences come from more than one species - do you wish to continue?
-
 
 # Once sequences are fetched provide user with a summary
