@@ -32,19 +32,16 @@ print(taxon_gr, "selected")
 space = " AND "
 quote = "\""
 full_query = quote + taxon_gr + space + protein_fam + quote
-	#efetch = "| efetch -format uid > uid_output"
 entrez_sum=" > entrez_sum.txt"
-esearch1="esearch -db protein -query "+full_query+entrez_sum
-	#esearch_command = esearch1 + efetch 
-	#esearch_fasta="esearch -db protein -query protein_family AND taxonomic_group | efetch -format fasta > fasta_uid"
+fetch_fasta=" | efetch -format fasta > fasta_seq"
 
-
-#subprocess.call(esearch_command, shell=True)
+esearch_count="esearch -db protein -query "+full_query+entrez_sum
+esearch_fasta="esearch -db protein -query "+full_query+fetch_fasta
 
 
 
 ### How many sequences? ###
-subprocess.call(esearch1, shell=True)
+subprocess.call(esearch_count, shell=True)
 
 # Open file containing entrez summary 
 with open("entrez_sum.txt") as my_file:
@@ -99,8 +96,9 @@ print("you made it")
 
 ### Download FASTA sequences ###
 
-# Fetch the sequences in fasta format 
-# subprocess.call(esearch_fasta, shell=True)
+print("Fetching sequences in fasta format")
+ 
+subprocess.call(esearch_fasta, shell=True)
 
 
 
