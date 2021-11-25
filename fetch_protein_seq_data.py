@@ -1,10 +1,13 @@
 ### TASK 1: Fetching user specified  protein sequence data ### 
+
 # The aim of this script is to fetch protein sequence data detailed in user input and to provide the user with a summary of actions taken. 
 
-#!/usr/bin/python3
 
-# Load necessary modules 
-import os, subprocess, sys 
+#!/usr/local/bin/python3
+
+
+### Load necessary modules ###
+import os, subprocess, sys, re
 
 	### Do you need to install esearch? ###
 
@@ -16,44 +19,61 @@ import os, subprocess, sys
 ### ASK USER FOR INFO ###
 
 # Ask user to specify protein family
-protein_family=input("Which protein family are you analysing?\n\t> ")
-print(protein_family, "selected")
+protein_fam=input("Which protein family are you analysing?\n\t> ")
+print(protein_fam, "selected")
 
 # Ask user to specify taxonomic group
-taxonomic_group=input("Which taxonomic group are you analysing?\n\t> ")
-print(taxonomic_group, "selected")
-
-esearch1="esearch -db protein -query protein_family AND taxonomic_group"
-esearch_command="esearch -db protein -query "protein_family AND taxonomic_group" | efetch -format uid > uid_output"
-# esearch_fasta="esearch -db protein -query protein_family AND taxonomic_group | efetch -format fasta > fasta_uid"
-
-	#esearch -db protein -query "taxonomic_group AND protein_family" | efetch -db protein -format uid > uid_output
-
-	#cat uid_output | wc -l > seq_number
-
-# These will then be input to the command used to fetch the sequences,
-# before downloading check the number of sequeces and the composition
+taxon_gr=input("Which taxonomic group are you analysing?\n\t> ")
+print(taxon_gr, "selected")
 
 
-# Perform command to fetch protein sequence data
+
+### Set variables ###
+space = " AND "
+quote = "\""
+full_query = quote + taxon_gr + space + protein_fam + quote
+	#efetch = "| efetch -format uid > uid_output"
+entrez_sum=" > entrez_sum.txt"
+esearch1="esearch -db protein -query "+full_query+entrez_sum
+	#esearch_command = esearch1 + efetch 
+	#esearch_fasta="esearch -db protein -query protein_family AND taxonomic_group | efetch -format fasta > fasta_uid"
+
+
+#subprocess.call(esearch_command, shell=True)
+
+
+
+### How many sequences? ###
 subprocess.call(esearch1, shell=True)
-subprocess.call(esearch_command, shell=True)
 
+# Open file containing entrez summary 
+with open("entrez_sum.txt") as my_file:
+      entrez_sum = my_file.read()
 
+# Format entrez_sum to a list so it can be iterated over
+entrez_summary = entrez_sum.split("\n")
 
-with open(r"uid_output", 'r') as fp:
-     x = len(fp.readlines())
-     print('total lines:', x)
+# Find countline 
+count_line=[]
+for sum in entrez_summary:
+     if re.search(r'Count', sum) :
+             count_line.append(sum)
+
+# Extract count from countline
+count = re.findall(r'\d+',str(count_line))
+count_str = str(count).strip("['']")
+x = int(count_str)
+
+print("Number of sequences:",+x)
 
 
 
 ### >1000 sequences ###
 
 # This block interacts with the user if there are more than 1000 sequences present
-#x=1800 # x is the number of sequences
 
 # Find out how user would like to proceed:
-if (x > 100):
+if (x > 1000):
   while True:
     try:
       a=input("More than 1000 sequences, do you wish to continue? (Yes or No)\n\t> ")
@@ -76,6 +96,8 @@ if (a == "No"):
 print("you made it")
 
 
+
+### Download FASTA sequences ###
 
 # Fetch the sequences in fasta format 
 # subprocess.call(esearch_fasta, shell=True)
