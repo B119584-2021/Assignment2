@@ -5,38 +5,46 @@
 
 
 ### Import necessary modules ###
-import re
-from collections import Counter
+import re, subprocess
+import pandas as pd
 
 
 #Open the fasta file
-with open("fasta_seq") as my_file:
+with open("fasta_seq.fa") as my_file:
       fasta_seq = my_file.read()
 
 
 #Split sequence into a list so that elements can be iterated over
 fasta = fasta_seq.split("\n")
 
-species = []
+species_name = []
+species_id = []
 
 for line in fasta:
      if re.search(r'>',line) :
-             species.append(line.split("[")[-1].strip("]"))
+             species_name.append(line.split("[")[-1].strip("]"))
+	     species_id.append(line.split(" ")[0])
 
-species_count=dict(Counter(species))
+
+# Create a dataframe which contains the species ID and name
+s1 = pd.Series(species_id)
+s2 = pd.Series(species_name)
+pd.DataFrame( { 'ID' : s1, 'Name' : s2 } )
+
+species_file = []
 
 for names in species:
      count = species.count(names)
-     print(names+":"+ str(count))
+     species_file.append(names+": "+ str(count))
+
+species_count = set(species_file)
+
+#Print species names and counts to the screen
+print(species_count.replace(",","\n")
 
 ## Need to get the file to a point where I can take the set values and print them to the screen
 
-with open(names_species, 'w') as species_names:
- species_names.write('')
- names=[]
-for name in species :
-	count = species.count(name)
-	species_names.write(name+': '+count)
+subprocess.call("clustalo -i fasta_seq.fa", shell=True)
 
-#perform alignment
+#perform alignment - read through the help informaiton (clustalo --help from commandline)
 #perform clustering and plotting

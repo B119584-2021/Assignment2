@@ -20,11 +20,11 @@ import os, subprocess, sys, re
 
 # Ask user to specify protein family
 protein_fam=input("Which protein family are you analysing?\n\t> ")
-print(protein_fam, "selected")
+print(protein_fam, "selected\n")
 
 # Ask user to specify taxonomic group
 taxon_gr=input("Which taxonomic group are you analysing?\n\t> ")
-print(taxon_gr, "selected")
+print(taxon_gr, "selected\n")
 
 
 
@@ -33,12 +33,15 @@ space = " AND "
 quote = "\""
 full_query = quote + taxon_gr + space + protein_fam + quote
 entrez_sum=" > entrez_sum.txt"
-fetch_fasta=" | efetch -format fasta > fasta_seq"
+fetch_fasta=" | efetch -format fasta > fasta_seq.fa"
 
 esearch_count="esearch -db protein -query "+full_query+entrez_sum
 esearch_fasta="esearch -db protein -query "+full_query+fetch_fasta
 
 
+
+# Remove pre-existing file if present
+rm -r entrez_sum.txt
 
 ### How many sequences? ###
 subprocess.call(esearch_count, shell=True)
@@ -61,7 +64,7 @@ count = re.findall(r'\d+',str(count_line))
 count_str = str(count).strip("['']")
 x = int(count_str)
 
-print("Number of sequences:",+x)
+print("Number of sequences:",+x,"\n")
 
 
 
@@ -83,27 +86,24 @@ if (x > 1000):
 
 # If user wishes to continue despite large size:
 if (a == "Yes"):
-  print("Continuing...")
+  print("Continuing...\n")
 
 # If user wishes to exit due to large size:
 if (a == "No"):
-  sys.exit("Exiting...")
+  sys.exit("Exiting...\n")
 
 #print to check you made it to the bottom
-print("you made it")
+print("you made it\n")
 
 
 
 ### Download FASTA sequences ###
 
-print("Fetching sequences in fasta format")
+print("Fetching sequences in fasta format\n")
  
 subprocess.call(esearch_fasta, shell=True)
 
 
 
-### CHECK IN WITH USER ###
-
-# The sequences come from more than one species - do you wish to continue?
-
-# Once sequences are fetched provide user with a summary
+### Remove temporary files that are no longer needed
+rm -r entrez_sum.txt
