@@ -9,11 +9,6 @@
 ### Load necessary modules ###
 import os, subprocess, sys, re
 
-	### Do you need to install esearch? ###
-
-	# Can you check if it installed first?
-	#sh -c "$(wget -q ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-edirect.sh -O -)"
-
 
 
 ### ASK USER FOR INFO ###
@@ -43,6 +38,8 @@ esearch_fasta="esearch -db protein -query "+full_query+fetch_fasta
 # Remove pre-existing file if present
 rm -r entrez_sum.txt
 
+
+
 ### How many sequences? ###
 subprocess.call(esearch_count, shell=True)
 
@@ -54,7 +51,7 @@ with open("entrez_sum.txt") as my_file:
 entrez_summary = entrez_sum.split("\n")
 
 # Find countline 
-count_line=[]
+count_line = []
 for sum in entrez_summary:
      if re.search(r'Count', sum) :
              count_line.append(sum)
@@ -99,11 +96,11 @@ print("you made it\n")
 
 ### Download FASTA sequences ###
 
-print("Fetching sequences in fasta format\n")
+print("Fetching sequences in FASTA format\n")
  
 subprocess.call(esearch_fasta, shell=True)
 
 
 
-### Remove temporary files that are no longer needed
+### Remove temporary files ###
 rm -r entrez_sum.txt
