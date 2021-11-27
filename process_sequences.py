@@ -19,32 +19,40 @@ fasta = fasta_seq.split("\n")
 
 species_name = []
 species_id = []
+species_info = []
 
-for line in fasta:
-     if re.search(r'>',line) :
-             species_name.append(line.split("[")[-1].strip("]"))
-	     species_id.append(line.split(" ")[0])
+for line in fasta :
+	if re.search(r'>',line) : 
+		species_name.append(line.split("[")[-1].strip("]"))
+		species_id.append(line.split(" ")[0])
+		name = line.split("[")[-1].strip("]")
+		id = line.split(" ")[0]
+		species_info.append(line.replace(id,"").replace(name,"").strip("[]"))
 
 
 # Create a dataframe which contains the species ID and name
 s1 = pd.Series(species_id)
 s2 = pd.Series(species_name)
-pd.DataFrame( { 'ID' : s1, 'Name' : s2 } )
+s3 = pd.Series(species_info)
+All_IDs_names = pd.DataFrame( { 'ID' : s1, 'Name' : s2, 'Info' : s3 } )
 
-species_file = []
+# Save a file that contains the IDs and names of the species proteins in the original fasta file 
+All_IDs_names.to_csv("All_IDs_names.csv", sep="\t")
 
-for names in species:
-     count = species.count(names)
-     species_file.append(names+": "+ str(count))
+# Save the unique species counts to a file which the user can view
+unique_species_count = pd.DataFrame(All_IDs_names['Name'].value_counts())
+unique_species_count.to_csv("Unique_species_count.csv", sep="\t")
 
-species_count = set(species_file)
+unique_species_count = pd.read_csv("Unique_species_count.csv", sep="\t")
+unique_species_count.columns = ['Name', 'Count']
+unique_species_count.to_csv("Unique_species_count.csv", sep="\t")
 
-#Print species names and counts to the screen
-print(species_count.replace(",","\n")
+print(unique_species_count.head(15))
+print(unique_species_count.tail(15))
 
 ## Need to get the file to a point where I can take the set values and print them to the screen
 
-subprocess.call("clustalo -i fasta_seq.fa", shell=True)
+# subprocess.call("clustalo -i fasta_seq.fa", shell=True)
 
 #perform alignment - read through the help informaiton (clustalo --help from commandline)
 #perform clustering and plotting
