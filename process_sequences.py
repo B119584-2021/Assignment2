@@ -68,30 +68,39 @@ max = unique_species_count['Count'][0]
 
 ### User input to assess the dataset ###
 
-# Inform user of significance of the lines printed to the screen
-print( "The most and least frequenct species have been listed for the downloaded sequences.\n" )
+# Explain what printed lines above are
+print( "\nThe most and least frequent species have been listed for the downloaded sequences.\n" )
 
 while True:
   try:
     a = input( "Would you like to keep all sequences and proceed with alignment? Type 'keep all'\nWhat is the minimum number of sequences you would like to keep? Type 'x'\n\t> " )
+
+    # To keep all sequences 
     if a == "keep all" :
       print( "Keeping all sequences" )
+      # Create input_fasta.fa and write fasta_seq contents to file
       inputf = open( "input_fasta.fa", "w" )
       inputf.write( fasta_seq )
       inputf.close()
       break
+
+    # To only keep a subset of sequences 
     if int(a) <= max :
       print( "Subsetting desired sequences" )
+      # Create list of unique names to subset sequences for
       subset = unique_species_count[ (unique_species_count['Count'] > int(a)) ]
       names = list( subset['Name'] )
 
       fasta = fasta_seq.split( ">" )
       symbol = ">"
 
+      # Create a new fasta file split into whole sequences
       fasta_list = []
       for line in fasta :
         fasta_list.append( symbol + line )
 
+      # Iterate over the objects in the new fasta file
+      # Will only keep sequences in list "names" 
       inputf = open( "input_fasta.fa", "w" )
       for line in fasta_list :
         for name in names :
@@ -99,14 +108,21 @@ while True:
             inputf.write( line )
       inputf.close()
       break
+
   except:
     print( "Wrong input, please input keep all or a number" )
     continue
 
 
 
-### Clustalo alignment and clustering ###
-subprocess.call( "clustalo -i input_fasta.fa > clustalo_alignment.txt", shell = True )
+### Alignment and plotting ###
 
-clustalo -i input_fasta.fa --outfmt msf --wrap=60 > clustalo_alignment.msf
+# Alignment is carried out using clustalo 
+subprocess.call( "clustalo -i input_fasta.fa --outfmt msf --wrap=80 > aligned_seq.msf", shell = True )
+
+# A prettier alignment is carried out with showalign
+subprocess.call( "showalign -sequence aligned_seq.msf", shell = True )
+
+# Conservation is plotted using plotcon
+subprocess.call( "plotcon -sformat msf aligned_seq.msf -graph svg", shell = True )
 
